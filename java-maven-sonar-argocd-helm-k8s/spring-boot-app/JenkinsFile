@@ -36,10 +36,10 @@ pipeline {
   }
   steps {
     script {
-      // ✅ Install Docker CLI inside the container
+      // ✅ Install just Docker CLI binary, no daemon
       sh '''
-        apt-get update
-        apt-get install -y docker-cli
+        curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-27.0.3.tgz -o docker.tgz
+        tar xzvf docker.tgz --strip 1 -C /usr/bin docker/docker
         docker --version
       '''
 

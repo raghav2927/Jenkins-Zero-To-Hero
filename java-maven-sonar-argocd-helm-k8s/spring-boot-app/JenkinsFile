@@ -61,6 +61,12 @@ pipeline {
         }
         steps {
           dir('java-maven-sonar-argocd-helm-k8s') {
+            // 👇 This makes sure repo is actually cloned here
+            checkout([$class: 'GitSCM',
+                      branches: [[name: '*/main']],
+                      userRemoteConfigs: [[url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git",
+                                           credentialsId: 'github']]])
+
             withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 sh '''
                     git config user.email "theerthalaraghavendra7@gmail.com"
@@ -68,7 +74,7 @@ pipeline {
                     BUILD_NUMBER=${BUILD_NUMBER}
                     sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" spring-boot-app-manifests/deployment.yml
                     git add spring-boot-app-manifests/deployment.yml
-                    git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                    git commit -m "Update deployment image to version ${BUILD_NUMBER}" || true
                     git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                 '''
             }
